@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv("../.env")
 import os
 from hashlib import md5
 
