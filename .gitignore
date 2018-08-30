@@ -1,5 +1,5 @@
 # ignore env file
-.Renviron
+.env
 
 # ignore R specific files
 .Rhistory

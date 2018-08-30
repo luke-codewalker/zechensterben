@@ -1,6 +1,6 @@
 # setup environment
 rm(list=ls())
-readRenviron(paste0(getwd(), "/.Renviron"))
+readRenviron(paste0(getwd(), "/.env))
 
 # load (or install if necessary) postgreSQL package
 if(!require("RPostgreSQL", quietly=TRUE)) {
