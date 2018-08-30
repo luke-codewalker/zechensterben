@@ -19,7 +19,7 @@ result = cursor.fetchone()
 if(result == None):
     print("creating new table", tablename)
     cursor.execute(
-        "CREATE TABLE {0} (id serial PRIMARY KEY, name varchar, region varchar, city varchar, open_year varchar, close_year varchar, is_active boolean DEFAULT false, notes varchar);".format(tablename))
+        "CREATE TABLE {0} (id serial PRIMARY KEY, name varchar, region varchar, city varchar, open_year integer, close_year integer, is_active boolean DEFAULT false, notes varchar);".format(tablename))
 else:
     print("Using existing table", result[2])
 
