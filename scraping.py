@@ -2,13 +2,15 @@ import psycopg2
 import requests
 from bs4 import BeautifulSoup
 import re
-
+from dotenv import load_dotenv
+load_dotenv()
+import os
 
 # connect to db and open a cursor to start read/write
 print("Connecting to PostgreSQL")
 
 connection = psycopg2.connect(
-    "dbname=zechensterben user=python password=topsecret")
+    "dbname={DB_NAME} user={DB_USER} password={DB_PASSWORD}".format(**os.environ))
 cursor = connection.cursor()
 
 
