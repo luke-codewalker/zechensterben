@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(dotenv_path="./.Renviron")
 import os
 
 # connect to db and open a cursor to start read/write

@@ -1,5 +1,4 @@
-# ignore env files
-.env
+# ignore env file
 .Renviron
 
 # ignore R specific files
