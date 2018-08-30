@@ -5,6 +5,7 @@ import re
 from dotenv import load_dotenv
 load_dotenv()
 import os
+from hashlib import md5
 
 # connect to db and open a cursor to start read/write
 print("Connecting to PostgreSQL")
@@ -25,7 +26,7 @@ result = cursor.fetchone()
 if(result == None):
     print("--> Creating new table", tablename)
     cursor.execute(
-        "CREATE TABLE {0} (id serial PRIMARY KEY, name varchar, region varchar, city varchar, open_year integer, close_year integer, is_active boolean DEFAULT false, notes varchar);".format(tablename))
+        "CREATE TABLE {0} (id varchar PRIMARY KEY, name varchar, region varchar, city varchar, open_year integer, close_year integer, is_active boolean DEFAULT false, notes varchar);".format(tablename))
 else:
     print("--> Using existing table", result[2])
 
@@ -72,12 +73,13 @@ for i, table in enumerate(tables):
             "notes": raw_data[5]
         }
 
+        ident_string = data["name"] + data["region"] + data["city"]
+        data["id"] = md5(ident_string.encode("utf-8")).hexdigest()[0:7]
         data["is_active"] = True if raw_data[4] == "heute" or data["notes"] == "aktiv" else False
 
         # insert into db
         cursor.execute(
-            "INSERT INTO wikidata (name, region, city, open_year, close_year, is_active, notes) VALUES ('{name}', '{region}', '{city}', {open_year}, {close_year}, '{is_active}', '{notes}');".format(**data))
-
+            "INSERT INTO wikidata (id, name, region, city, open_year, close_year, is_active, notes) VALUES ('{id}', '{name}', '{region}', '{city}', {open_year}, {close_year}, '{is_active}', '{notes}') ON CONFLICT (id) DO NOTHING;".format(**data))
 
 # commit changes and close connections
 print("Done")
