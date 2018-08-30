@@ -3,10 +3,14 @@ import requests
 from bs4 import BeautifulSoup
 import re
 
+
 # connect to db and open a cursor to start read/write
+print("Connecting to PostgreSQL")
+
 connection = psycopg2.connect(
     "dbname=zechensterben user=python password=topsecret")
 cursor = connection.cursor()
+
 
 # check if wikidata table already exists if not create it
 tablename = "wikidata"
@@ -17,21 +21,25 @@ cursor.execute(
 result = cursor.fetchone()
 
 if(result == None):
-    print("creating new table", tablename)
+    print("--> Creating new table", tablename)
     cursor.execute(
         "CREATE TABLE {0} (id serial PRIMARY KEY, name varchar, region varchar, city varchar, open_year integer, close_year integer, is_active boolean DEFAULT false, notes varchar);".format(tablename))
 else:
-    print("Using existing table", result[2])
+    print("--> Using existing table", result[2])
 
 
 # get the wikipedia page and parse the content
+print("Fetching data from wikipedia page")
+
 response = requests.get(
     "https://de.m.wikipedia.org/wiki/Liste_von_Bergwerken_in_Nordrhein-Westfalen")
+
 soup = BeautifulSoup(response.text, 'html.parser')
 
-print('Now sraping', soup.title.get_text())
 
 # find all collapsible divs and extract the tables in there
+print("Now scraping", soup.title.get_text())
+
 divs = soup.find_all("div", {"class": "collapsible-block"})
 
 tables = []
@@ -39,6 +47,7 @@ for div in divs:
     table = div.find("table")
     if(table):
         tables.append(table)
+
 
 # pull data out of tables and write it to db
 print("Formatting data and inserting into", tablename)
@@ -66,6 +75,7 @@ for i, table in enumerate(tables):
         # insert into db
         cursor.execute(
             "INSERT INTO wikidata (name, region, city, open_year, close_year, is_active, notes) VALUES ('{name}', '{region}', '{city}', {open_year}, {close_year}, '{is_active}', '{notes}');".format(**data))
+
 
 # commit changes and close connections
 print("Done")
