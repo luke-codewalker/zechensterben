@@ -26,7 +26,7 @@ result = cursor.fetchone()
 if(result == None):
     print("--> Creating new table", tablename)
     cursor.execute(
-        "CREATE TABLE {} (id varchar PRIMARY KEY, name varchar, region varchar, city varchar, open_year integer, close_year integer, is_active boolean DEFAULT false, notes varchar);".format(tablename))
+        "CREATE TABLE {} (id varchar PRIMARY KEY, name varchar, region varchar, city varchar, open_year integer, close_year integer, is_active boolean DEFAULT false, notes varchar, lon float, lat float);".format(tablename))
 else:
     print("--> Using existing table", result[2])
 
@@ -85,7 +85,8 @@ for i, table in enumerate(tables):
         if(cursor.fetchone()):
             inserted_ids.append(cursor.fetchone())
 
-print("Inserted {0} rows {1}".format(len(inserted_ids), "" if len(inserted_ids) > 0 else "(db might already be populated)"))
+print("Inserted {0} rows {1}".format(len(inserted_ids), "" if len(
+    inserted_ids) > 0 else "(db might already be populated)"))
 
 # commit changes and close connections
 print("Done")
