@@ -3,3 +3,4 @@
 
 # ignore R specific files
 .Rhistory
+.RProfile
