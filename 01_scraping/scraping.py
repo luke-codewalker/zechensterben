@@ -19,14 +19,14 @@ cursor = connection.cursor()
 tablename = "wikidata"
 
 cursor.execute(
-    "SELECT * FROM information_schema.tables WHERE table_name='{0}';".format(tablename))
+    "SELECT * FROM information_schema.tables WHERE table_name='{}';".format(tablename))
 
 result = cursor.fetchone()
 
 if(result == None):
     print("--> Creating new table", tablename)
     cursor.execute(
-        "CREATE TABLE {0} (id varchar PRIMARY KEY, name varchar, region varchar, city varchar, open_year integer, close_year integer, is_active boolean DEFAULT false, notes varchar);".format(tablename))
+        "CREATE TABLE {} (id varchar PRIMARY KEY, name varchar, region varchar, city varchar, open_year integer, close_year integer, is_active boolean DEFAULT false, notes varchar);".format(tablename))
 else:
     print("--> Using existing table", result[2])
 
@@ -55,6 +55,8 @@ for div in divs:
 # pull data out of tables and write it to db
 print("Formatting data and inserting into", tablename)
 
+inserted_ids = []
+
 for i, table in enumerate(tables):
     rows = table.find_all("tr")
     for row in rows[1:len(rows)-1]:
@@ -68,8 +70,8 @@ for i, table in enumerate(tables):
             "name": raw_data[0],
             "region": raw_data[1],
             "city": raw_data[2],
-            "open_year": open_year_match.group(0) if open_year_match else "NULL",
-            "close_year": close_year_match.group(0) if close_year_match else "NULL",
+            "open_year": open_year_match.group(0) if open_year_match else None,
+            "close_year": close_year_match.group(0) if close_year_match else None,
             "notes": raw_data[5]
         }
 
@@ -77,9 +79,13 @@ for i, table in enumerate(tables):
         data["id"] = md5(ident_string.encode("utf-8")).hexdigest()[0:7]
         data["is_active"] = True if raw_data[4] == "heute" or data["notes"] == "aktiv" else False
 
-        # insert into db
+        # insert into db (on succes id is returned and added to list)
         cursor.execute(
-            "INSERT INTO wikidata (id, name, region, city, open_year, close_year, is_active, notes) VALUES ('{id}', '{name}', '{region}', '{city}', {open_year}, {close_year}, '{is_active}', '{notes}') ON CONFLICT (id) DO NOTHING;".format(**data))
+            "INSERT INTO wikidata (id, name, region, city, open_year, close_year, is_active, notes) VALUES (%(id)s, %(name)s, %(region)s, %(city)s, %(open_year)s::integer, %(close_year)s::integer, %(is_active)s::boolean, %(notes)s) ON CONFLICT (id) DO NOTHING RETURNING id;", data)
+        if(cursor.fetchone()):
+            inserted_ids.append(cursor.fetchone())
+
+print("Inserted {0} rows {1}".format(len(inserted_ids), "" if len(inserted_ids) > 0 else "(db might already be populated)"))
 
 # commit changes and close connections
 print("Done")
